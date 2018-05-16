@@ -1,3 +1,7 @@
+# AIES 2018 Branch
+This branch contains a snapshot of the work described below as of February 2018.
+The code and documentation here corresponds with the paper ["Measuring and Mitigating Unintended Bias in Text Classification" (Dixon et al. AIES 2018)](https://github.com/conversationai/unintended-ml-bias-analysis/blob/AIES-2018/presentations/measuring-mitigating-unintended-bias-paper.pdf).
+
 # Unintended Bias Analysis
 
 Tools and resources to help analyze and ameliorate unintended bias in text
