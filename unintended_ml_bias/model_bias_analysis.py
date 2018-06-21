@@ -27,6 +27,7 @@ import os
 import numpy as np
 import pandas as pd
 import re
+import math
 import matplotlib.pyplot as plt
 from sklearn import metrics
 import scipy.stats as stats
@@ -110,43 +111,44 @@ def normalized_mwu(data1, data2, model_name):
   scores_2 = data2[model_name]
   n1 = len(scores_1)
   n2 = len(scores_2)
-  u, _ = stats.mannwhitneyu(scores_1, scores_2, alternative = 'less')
-  return u/(n1*n2)
+  u, p = stats.mannwhitneyu(scores_1, scores_2, alternative = 'less')
+  if p == 0: p = 1e-300
+  return u/(n1*n2), math.log(p)
 
 
 def compute_within_negative_label_mwu(df, subgroup, label, model_name):
-  u_negative = normalized_mwu(df[~df[subgroup] & ~df[label]],
+  u_negative, p_negative = normalized_mwu(df[~df[subgroup] & ~df[label]],
                               df[df[subgroup] & ~df[label]],
                               model_name)
-  return 1 - abs(0.5 - u_negative)
+  return 1 - abs(0.5 - u_negative), p_negative
 
 
 def compute_within_positive_label_mwu(df, subgroup, label, model_name):
-  u_positive = normalized_mwu(df[~df[subgroup] & df[label]],
+  u_positive, p_positive = normalized_mwu(df[~df[subgroup] & df[label]],
                               df[df[subgroup] & df[label]],
                               model_name)
-  return 1 - abs(0.5 - u_positive)
+  return 1 - abs(0.5 - u_positive), p_positive 
 
     
 def compute_within_subgroup_mwu(df, subgroup, label, model_name):
-  u_subgroup = normalized_mwu(df[df[subgroup] & ~df[label]], 
+  u_subgroup, p_subgroup = normalized_mwu(df[df[subgroup] & ~df[label]], 
                               df[df[subgroup] & df[label]],
                               model_name)
-  return 1 - u_subgroup
+  return 1 - u_subgroup, p_subgroup
 
 
 def compute_cross_subgroup_negative_mwu(df, subgroup, label, model_name):
-  u_subgroup_negative = normalized_mwu(df[df[subgroup] & ~df[label]],
+  u_subgroup_negative, p_subgroup_negative = normalized_mwu(df[df[subgroup] & ~df[label]],
                                        df[~df[subgroup] & df[label]],
                                        model_name)
-  return 1 - u_subgroup_negative
+  return 1 - u_subgroup_negative, p_subgroup_negative
 
 
 def compute_cross_subgroup_positive_mwu(df, subgroup, label, model_name):
-  u_subgroup_positive = normalized_mwu(df[~df[subgroup] & ~df[label]],
+  u_subgroup_positive, p_subgroup_positive = normalized_mwu(df[~df[subgroup] & ~df[label]],
                                        df[df[subgroup] & df[label]],
                                        model_name)
-  return 1 - u_subgroup_positive
+  return 1 - u_subgroup_positive, p_subgroup_positive #
     
     
 def per_subgroup_aucs(dataset, subgroups, model_families, label_col):
